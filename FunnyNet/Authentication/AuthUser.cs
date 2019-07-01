@@ -1,4 +1,5 @@
-﻿using FunnyNet.Rest;
+﻿using FunnyNet.Paging;
+using FunnyNet.Rest;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -32,6 +33,8 @@ namespace FunnyNet.Authentication
             AuthUser user = new AuthUser();
             return await user.TryLoginAsync(email, password) ? user : null;
         }
+
+        public Task<Feed<Content>> GetFeaturedAsync(int limit = 30) => Funny.GetFeaturedAsync(limit, null, this);
 
         public async Task<bool> TryLoginAsync(string email, string password)
         {

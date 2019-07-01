@@ -12,8 +12,15 @@ namespace FunnyNetTest
         static async Task Main(string[] args)
         {
             Feed<Content> features = await Funny.GetFeaturedAsync();
-            foreach(Content feature in features.Items)
-                Console.WriteLine("Created on {0}\nFeatured on {1}\n", feature.DateCreated, feature.DateFeatured);
+            foreach(Content feature in features)
+            {
+                Console.WriteLine("\nCreated on {0}\nFeatured on {1}", feature.DateCreated, feature.DateFeatured);
+                Feed<Comment> comments = await feature.GetCommentsAsync(2);
+                foreach (Comment comment in comments)
+                {
+                    Console.WriteLine("{0}: {1}", comment.Creator.Name, comment.Text);
+                }
+            }
         }
     }
 }

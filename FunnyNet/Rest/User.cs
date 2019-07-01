@@ -7,13 +7,8 @@ using System.Text.Json.Serialization;
 
 namespace FunnyNet.Rest
 {
-    public class User : IUser
+    public class User : RestObject, IUser
     {
-        internal AuthUser Getter { get; set; }
-
-        [JsonProperty("id")]
-        public string Id { get; private set; }
-
         [JsonProperty("nick")]
         public string Name { get; private set; }
 

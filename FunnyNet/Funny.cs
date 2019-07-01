@@ -30,17 +30,12 @@ namespace FunnyNet
         public static Task<Feed<Content>> GetFeaturedAsync(int limit = 30, string next = null, AuthUser getter = null)
             => GetFeedAsync<Content>(Endpoints.FeaturedFeed, limit, next, getter);
 
-        internal static async Task<Feed<T>> GetFeedAsync<T>(string feedUrl, int limit = 30, string next = null, AuthUser getter = null, bool flag = false)
+        internal static async Task<Feed<T>> GetFeedAsync<T>(string feedUrl, int limit = 30, string next = null, AuthUser getter = null, bool flag = false) where T : RestObject
         {
             using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, string.Concat(feedUrl, flag ? "&" : "?", "limit=", limit, next == null ? "" : string.Concat("&next=", next)));
             using HttpResponseMessage response = await SendInternalAsync(request, getter);
 
-            JObject obj = JObject.Parse(await response.Content.ReadAsStringAsync());
-            Feed<T> feed = obj["data"].First.First.ToObject<Feed<T>>();
-            feed.Getter = getter;
-            feed.Url = feedUrl;
-
-            return feed;
+            return new Feed<T>(JObject.Parse(await response.Content.ReadAsStringAsync()), feedUrl, getter);
         }
 
         internal static Task<HttpResponseMessage> SendInternalAsync(HttpRequestMessage request, AuthUser sender = null)

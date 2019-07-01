@@ -1,6 +1,9 @@
 ﻿using FunnyNet.Authentication;
+using FunnyNet.Rest;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,19 +31,29 @@ namespace FunnyNet.Paging
         public bool HasPrevious { get; private set; }
     }
 
-    public class Feed<T>
+    public class Feed<T> : IEnumerable where T : RestObject
     {
-        internal AuthUser Getter { get; set; }
-        internal string Url { get; set; }
-
-        [JsonProperty("items")]
-        public List<T> Items { get; private set; }
-
-        [JsonProperty("paging")]
-        private FeedPaging Paging { get; set; }
-
+        public List<T> Items { get; }
         public bool HasNext => Paging.HasNext;
         public bool HasPrevious => Paging.HasPrevious;
+
+        private FeedPaging Paging { get; }
+        private AuthUser Getter { get; }
+        private string Url { get; }
+
+        internal Feed(JObject jObject, string url, AuthUser getter)
+        {
+            Url = url;
+            Getter = getter;
+
+            var feedObj = jObject["data"].First.First;
+            Items = feedObj["items"].ToObject<List<T>>();
+            Paging = feedObj["paging"].ToObject<FeedPaging>();
+
+            if (getter != null)
+                for (int i = 0; i < Items.Count; i++)
+                    Items[i].Getter = getter;
+        }
 
         public async Task<Feed<T>> GetNextAsync(int limit = 30)
             => await Funny.GetFeedAsync<T>(Url, limit, Paging.Cursors.Next, Getter);
@@ -72,5 +85,7 @@ namespace FunnyNet.Paging
             }
             while (feed.HasNext);
         }
+
+        public IEnumerator GetEnumerator() => Items.GetEnumerator();
     }
 }

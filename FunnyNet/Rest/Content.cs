@@ -1,8 +1,10 @@
 ﻿using FunnyNet.Authentication;
+using FunnyNet.Paging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FunnyNet.Rest
 {
@@ -24,11 +26,8 @@ namespace FunnyNet.Rest
         public int Views { get; set; }
     }
 
-    public class Content
+    public class Content : RestObject
     {
-        [JsonProperty("id")]
-        public string Id { get; private set; }
-
         [JsonProperty("is_featured")]
         public bool IsFeatured { get; private set; }
 
@@ -94,7 +93,7 @@ namespace FunnyNet.Rest
         }
 
         private AuthUser _getter;
-        internal AuthUser Getter
+        new internal AuthUser Getter
         {
             get { return _getter; }
             set
@@ -103,5 +102,7 @@ namespace FunnyNet.Rest
                 _creator.Getter = value;
             }
         }
+
+        public Task<Feed<Comment>> GetCommentsAsync(int limit = 30) => Funny.GetFeedAsync<Comment>(string.Format(Endpoints.Comments, Id), limit, getter: Getter);
     }
 }

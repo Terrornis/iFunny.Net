@@ -21,22 +21,20 @@ namespace FunnyNet.Authentication
             Encoding.ASCII.GetBytes(guidHex, guidBytes);
             Encoding.ASCII.GetBytes(":MsOIJ39Q28:PTDc3H8a)Vi=UYap", guidBytes.Slice(72));
 
-            using (SHA1 sha = new SHA1CryptoServiceProvider())
-            {
-                Span<byte> hash = stackalloc byte[20];
-                sha.TryComputeHash(guidBytes, hash, out _);
+            using SHA1 sha = new SHA1CryptoServiceProvider();
+            Span<byte> hash = stackalloc byte[20];
+            sha.TryComputeHash(guidBytes, hash, out _);
 
-                Span<char> hashHex = stackalloc char[40];
-                for(int i = 0; i < hash.Length; i++)
-                    hash[i].TryFormat(hashHex.Slice(i * 2), out _, "x2");
+            Span<char> hashHex = stackalloc char[40];
+            for (int i = 0; i < hash.Length; i++)
+                hash[i].TryFormat(hashHex.Slice(i * 2), out _, "x2");
 
-                Span<byte> result = stackalloc byte[124];
-                guidBytes.Slice(0, 72).CopyTo(result);
-                Encoding.ASCII.GetBytes("_MsOIJ39Q28:", result.Slice(72));
-                Encoding.ASCII.GetBytes(hashHex, result.Slice(84));
+            Span<byte> result = stackalloc byte[124];
+            guidBytes.Slice(0, 72).CopyTo(result);
+            Encoding.ASCII.GetBytes("_MsOIJ39Q28:", result.Slice(72));
+            Encoding.ASCII.GetBytes(hashHex, result.Slice(84));
 
-                return Convert.ToBase64String(result);
-            }
+            return Convert.ToBase64String(result);
         }
     }
 }
